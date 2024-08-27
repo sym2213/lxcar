@@ -27,13 +27,18 @@
             align-items: center;
             justify-content: center;
             overflow: hidden;
+            cursor: grab;
+        }
+
+        .carousel-container:active {
+            cursor: grabbing;
         }
 
         .carousel-images {
             display: flex;
             height: 100%;
             width: 100%;
-            transition: transform 1s ease;
+            transition: transform 0.3s ease;
         }
 
         .carousel-images img {
@@ -155,13 +160,17 @@
     <script>
         let currentSlide = 0;
         const indicators = document.querySelectorAll('.indicator');
+        const carouselImages = document.querySelector('.carousel-images');
+        let isDragging = false;
+        let startPos = 0;
+        let currentTranslate = 0;
+        let prevTranslate = 0;
+        let animationID;
+        let currentIndex = 0;
 
         function showSlide(index) {
-            const slides = document.querySelector('.carousel-images');
-            const totalSlides = document.querySelectorAll('.carousel-images img').length;
-
-            currentSlide = (index + totalSlides) % totalSlides;
-            slides.style.transform = `translateX(-${currentSlide * 100}%)`;
+            currentSlide = (index + carouselImages.children.length) % carouselImages.children.length;
+            carouselImages.style.transform = `translateX(-${currentSlide * 100}%)`;
             updateIndicators();
         }
 
@@ -173,6 +182,45 @@
                     indicator.classList.remove('active');
                 }
             });
+        }
+
+        carouselImages.addEventListener('mousedown', startDragging);
+        carouselImages.addEventListener('mouseup', stopDragging);
+        carouselImages.addEventListener('mouseleave', stopDragging);
+        carouselImages.addEventListener('mousemove', dragging);
+
+        function startDragging(event) {
+            isDragging = true;
+            startPos = event.pageX;
+            carouselImages.style.transition = 'none';
+        }
+
+        function dragging(event) {
+            if (!isDragging) return;
+            const currentPosition = event.pageX;
+            const moveBy = currentPosition - startPos;
+            currentTranslate = prevTranslate + moveBy;
+            carouselImages.style.transform = `translateX(${currentTranslate}px)`;
+        }
+
+        function stopDragging() {
+            isDragging = false;
+            const movedBy = currentTranslate - prevTranslate;
+            if (movedBy < -100 && currentIndex < carouselImages.children.length - 1) {
+                currentIndex++;
+            }
+            if (movedBy > 100 && currentIndex > 0) {
+                currentIndex--;
+            }
+            setPositionByIndex();
+        }
+
+        function setPositionByIndex() {
+            currentTranslate = currentIndex * -window.innerWidth;
+            prevTranslate = currentTranslate;
+            carouselImages.style.transition = 'transform 0.3s ease';
+            carouselImages.style.transform = `translateX(${currentTranslate}px)`;
+            updateIndicators();
         }
 
         setInterval(() => {
