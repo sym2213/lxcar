@@ -1,12 +1,238 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>嵌入网站</title>
+    <title>汽车 AI 问答展示</title>
+    <link rel="shortcut icon" href="https://tse3-mm.cn.bing.net/th/id/OIP-C.G1f7HcAqW-kHUcqevySQ5AAAAA?rs=1&pid=ImgDetMain">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body,
+        html {
+            height: 100%;
+            font-family: 'Roboto', sans-serif;
+            overflow: hidden;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+
+        .carousel-container, .iframe-container {
+            height: 100%;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .carousel-container {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .carousel-images {
+            display: flex;
+            height: 100%;
+            width: 100%;
+            transition: transform 1s ease;
+        }
+
+        .carousel-images img {
+            min-width: 100%;
+            object-fit: cover;
+        }
+
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 100%;
+            background: linear-gradient(to bottom right, rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.3));
+            z-index: 1;
+        }
+
+        .content {
+            position: absolute;
+            text-align: center;
+            z-index: 2;
+            color: white;
+        }
+
+        .content h1 {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5);
+        }
+
+        .content p {
+            font-size: 1.5rem;
+            margin-bottom: 40px;
+            text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5);
+        }
+
+        .btn {
+            padding: 15px 50px;
+            background-color: rgba(255, 255, 255, 0.2);
+            color: white;
+            font-size: 1.2rem;
+            border: 2px solid white;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+        }
+
+        .btn:hover {
+            background-color: rgba(255, 255, 255, 0.4);
+            border-color: white;
+        }
+
+        @media (max-width: 768px) {
+            .content h1 {
+                font-size: 2rem;
+            }
+
+            .content p {
+                font-size: 1.2rem;
+            }
+
+            .btn {
+                padding: 10px 30px;
+                font-size: 1rem;
+            }
+        }
+
+        .indicators {
+            position: absolute;
+            bottom: 20px;
+            display: flex;
+            gap: 10px;
+            z-index: 2;
+        }
+
+        .indicators button {
+            width: 15px;
+            height: 15px;
+            background-color: rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            transition: transform 0.3s ease, background-color 0.3s ease;
+        }
+
+        .indicators button.active {
+            transform: scale(1.33);
+            background-color: white;
+        }
+
+        .iframe-container {
+            display: none;
+        }
+
+        .iframe-container iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+    </style>
 </head>
+
 <body>
-    <h1>嵌入的内容</h1>
-    <iframe src="https://share.fastgpt.in/chat/share?shareId=z5hmllz1fhjer0wl53jx02hh" width="100%" height="800" style="border:none;"></iframe>
+    <!-- Carousel Container -->
+    <div class="carousel-container" id="carousel-container">
+        <div class="carousel-images">
+            <img src="https://img.cy-cdn.com/w3/499/large/16082813844499.png" alt="理想汽车 1" loading="lazy">
+            <img src="https://p6.itc.cn/images01/20200905/fbd266d908e7470684f5802a53d5a92d.jpeg" alt="理想汽车 2" loading="lazy">
+            <img src="https://picx.zhimg.com/v2-be3a9694c19351d3f5cbbfd2ca9e5b7c_r.jpg" alt="理想汽车 3" loading="lazy">
+            <img src="https://s3.xchuxing.com/xchuxing/article/2022/10/01/ebd27202210011048482868.jpg" alt="理想汽车 4" loading="lazy">
+        </div>
+
+        <div class="overlay"></div>
+
+        <div class="content">
+            <h1>AI 智能汽车顾问</h1>
+            <p>以吾之理 答您所想</p>
+            <button class="btn" onclick="switchToIframe()">了解更多</button>
+        </div>
+
+        <div class="indicators">
+            <button class="indicator active" onclick="showSlide(0)"></button>
+            <button class="indicator" onclick="showSlide(1)"></button>
+            <button class="indicator" onclick="showSlide(2)"></button>
+            <button class="indicator" onclick="showSlide(3)"></button>
+        </div>
+    </div>
+
+    <!-- Iframe Container -->
+    <div class="iframe-container" id="iframe-container">
+        <iframe src="https://share.fastgpt.in/chat/share?shareId=z5hmllz1fhjer0wl53jx02hh"></iframe>
+    </div>
+
+    <script>
+        let currentSlide = 0;
+        const indicators = document.querySelectorAll('.indicator');
+        const slides = document.querySelector('.carousel-images');
+        let isDragging = false;
+        let startX, startSlide;
+        let originalCursor;
+
+        function showSlide(index) {
+            const totalSlides = document.querySelectorAll('.carousel-images img').length;
+            currentSlide = (index + totalSlides) % totalSlides;
+            slides.style.transform = `translateX(-${currentSlide * 100}%)`;
+            updateIndicators();
+        }
+
+        function updateIndicators() {
+            indicators.forEach((indicator, index) => {
+                if (index === currentSlide) {
+                    indicator.classList.add('active');
+                } else {
+                    indicator.classList.remove('active');
+                }
+            });
+        }
+
+        setInterval(() => {
+            showSlide(currentSlide + 1);
+        }, 3000);
+
+        document.addEventListener('mousedown', (e) => {
+            if (e.button !== 0) return; // Only respond to left mouse button
+            isDragging = true;
+            startX = e.pageX;
+            startSlide = currentSlide;
+            originalCursor = document.body.style.cursor;
+            document.body.style.cursor = 'grabbing';
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            const diffX = e.pageX - startX;
+            const slideWidth = document.body.clientWidth;
+            const newSlide = startSlide - Math.round(diffX / slideWidth);
+            showSlide(newSlide);
+        });
+
+        document.addEventListener('mouseup', () => {
+            isDragging = false;
+            document.body.style.cursor = originalCursor;
+        });
+
+        // Function to switch to iframe view
+        function switchToIframe() {
+            document.getElementById('carousel-container').style.display = 'none';
+            document.getElementById('iframe-container').style.display = 'flex';
+        }
+    </script>
 </body>
+
 </html>
