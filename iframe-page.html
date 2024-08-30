@@ -1,25 +1,37 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>用车知识问答系统</title>
+    <style>
+        /* 设置页面整体为弹性布局，确保 iframe 自适应屏幕 */
+        html, body {
+            margin: 0;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* 使 iframe 占满屏幕的可用空间 */
+        iframe {
+            flex: 1;
+            border: none;
+        }
+    </style>
 </head>
 <body>
     <iframe 
-    src="https://share.fastgpt.in/chat/share?shareId=z5hmllz1fhjer0wl53jx02hh" 
-    style="width: 100%; height: 800px;"  
-    frameborder="0" 
-    allow="camera *; microphone *;">
-</iframe>
-
+        src="https://share.fastgpt.in/chat/share?shareId=z5hmllz1fhjer0wl53jx02hh" 
+        allow="camera *; microphone *;">
+    </iframe>
 
     <script>
         // 请求麦克风和摄像头权限
         navigator.mediaDevices.getUserMedia({ video: true, audio: true })
             .then(function(stream) {
                 console.log('已点击允许,开启成功');
-                // 你可以在这里处理音频流或视频流
+                // 处理音频流或视频流
             })
             .catch(function(error) {
                 console.error('错误：', error);
